@@ -1,0 +1,80 @@
+'use strict';
+
+const fs = require('fs');
+
+process.stdin.resume();
+process.stdin.setEncoding('utf-8');
+
+let inputString = '';
+let currentLine = 0;
+
+process.stdin.on('data', function(inputStdin) {
+    inputString += inputStdin;
+});
+
+process.stdin.on('end', function() {
+    inputString = inputString.split('\n');
+
+    main();
+});
+
+function readLine() {
+    return inputString[currentLine++];
+}
+
+/*
+ * Complete the 'timeInWords' function below.
+ *
+ * The function is expected to return a STRING.
+ * The function accepts following parameters:
+ *  1. INTEGER h
+ *  2. INTEGER m
+ */
+
+function numToWords(num = 0) {
+    if (num == 0) return "Zero";
+    num= ("0".repeat(2*(num+="").length%3)+num).match(/.{3}/g);
+    let out="",
+        T10s=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"],
+        T20s=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"],
+        sclT=["","thousand","million","billion","trillion","quadrillion"];
+    return num.forEach((n,i) => {
+    if (+n) {
+    let hund=+n[0], ten=+n.substring(1), scl=sclT[num.length-i-1];
+    out+=(out?" ":"")+(hund?T10s[hund]+" hundred":"")+(hund && ten?" ":"")+(ten<20?T10s[ten]:T20s[+n[1]]+(+n[2]?" ":"")+T10s[+n[2]]);
+    out+=(out && scl?" ":"")+scl;
+    }}),out;
+}
+
+
+function timeInWords(h, m) {
+    // Write your code here
+    let hWords = numToWords(h)
+    let hPlusWords = numToWords(h+1)
+    let mWords = numToWords(m)
+    let mMinusWords = numToWords(60-m)
+    let time = ""
+    if(m == 0){time = hWords+" o' clock"}
+    if(m == 15){time = "quarter past "+hWords}
+    if(m == 1){time = mWords+" minute past "+hWords}
+    if(m == 30){time = "half past "+hWords}
+    if(m == 45){time = "quarter to "+hPlusWords}
+    if(m < 30 && m != 15 && m != 1 && m!= 0){time = mWords+" minutes past "+hWords }
+    if(m > 30 && m != 45){time = mMinusWords+" minutes to "+hPlusWords}
+
+    return time;
+}
+
+function main() {
+    const ws = fs.createWriteStream(process.env.OUTPUT_PATH);
+
+    const h = parseInt(readLine().trim(), 10);
+
+    const m = parseInt(readLine().trim(), 10);
+
+    const result = timeInWords(h, m);
+
+    ws.write(result + '\n');
+
+    ws.end();
+}
